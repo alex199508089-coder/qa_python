@@ -8,7 +8,7 @@ class TestBooksCollector:
     @pytest.mark.parametrize("name, expected_in_dict, expected_genre", [
         ("A", True, ""),                     # 1 символ
         ("Война и мир", True, ""),           # кириллица
-        ("A" * 40, True, ""),                # ровно 40 символов
+        ("A" * 40, True, ""),                # 40 символов
         ("", False, None),                   # пустая строка
         ("A" * 41, False, None)              # 41 символ
     ])
