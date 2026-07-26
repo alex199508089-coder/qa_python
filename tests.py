@@ -134,7 +134,7 @@ class TestBooksCollector:
     # 10. Тест метода get_list_of_favorites_books
     def test_get_list_of_favorites_books(self):
         collector = BooksCollector()
-        collector.add_new_book("Сказка о царе Салтане")
+        collector.add_new_book("Сказка о царе Султане")
         collector.add_new_book("Руслан и Людмила")
-        collector.add_book_in_favorites("Сказка о царе Салтане")
-        assert collector.get_list_of_favorites_books() == ["Сказка о царе Салтане"]
+        collector.add_book_in_favorites("Сказка о царе Султане")
+        assert collector.get_list_of_favorites_books() == ["Сказка о царе Султане"]
