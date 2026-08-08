@@ -4,13 +4,19 @@ from main import BooksCollector
 
 class TestBooksCollector:
 
-    # 1. Тест метода add_new_book — валидные и невалидные названия (параметризованный)
-    @pytest.mark.parametrize("name, expected_in_dict, expected_genre", [
-        ("A", True, ""),                     # 1 символ
-        ("Война и мир", True, ""),           # кириллица
-        ("A" * 40, True, ""),                # 40 символов
-        ("", False, None),                   # пустая строка
-        ("A" * 41, False, None)              # 41 символ
+    # 1a. Валидные названия
+    @pytest.mark.parametrize("name", ["A", "Война и мир", "A" * 40]) [
+    def test_add_new_book_valid_names(self, collector, name):
+        collector.add_new_book(name)
+        assert name in collector.books_genre
+        assert collector.get_book_genre(name) == ""
+
+        # 1b. Невалидные названия
+    @pytest.mark.parametrize("name", ["", "A" * 41])
+    def test_add_new_book_invalid_names(self, collector, name):
+        collector.add_new_book(name)
+        assert name not in collector.books_genre
+
     ])
     def test_add_new_book(self, name, expected_in_dict, expected_genre):
         collector = BooksCollector()
