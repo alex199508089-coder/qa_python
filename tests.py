@@ -17,13 +17,6 @@ class TestBooksCollector:
         collector.add_new_book(name)
         assert name not in collector.books_genre
 
-    ])
-    def test_add_new_book(self, name, expected_in_dict, expected_genre):
-        collector = BooksCollector()
-        collector.add_new_book(name)
-        assert (name in collector.books_genre) == expected_in_dict
-        if expected_in_dict:
-            assert collector.get_book_genre(name) == expected_genre
 
     # 2. Тест: повторное добавление книги не перезаписывает её жанр
     def test_add_new_book_duplicate_preserves_genre(self):
@@ -88,54 +81,54 @@ class TestBooksCollector:
     # 7. Тест метода get_books_for_children (параметризованный)
     @pytest.mark.parametrize("books_data, expected_children", [
         (
-            [("Винни-Пух", "Мультфильмы"), ("Оно", "Ужасы"), ("Три товарища", "")],
-            ["Винни-Пух"]                     # книга без жанра не подходит
+                [("Винни-Пух", "Мультфильмы"), ("Оно", "Ужасы"), ("Три товарища", "")],
+                ["Винни-Пух"]
         ),
         (
-            [("Шерлок Холмс", "Детективы"), ("Кладбище домашних животных", "Ужасы")],
-            []                                # все книги с возрастным рейтингом
+                [("Шерлок Холмс", "Детективы"), ("Кладбище домашних животных", "Ужасы")],
+                []
         ),
         (
-            [("Гарри Поттер", "Фантастика"), ("Карлсон", "Мультфильмы")],
-            ["Гарри Поттер", "Карлсон"]       # обе подходят детям
+                [("Гарри Поттер", "Фантастика"), ("Карлсон", "Мультфильмы")],
+                ["Гарри Поттер", "Карлсон"]
         )
     ])
-    def test_get_books_for_children(self, books_data, expected_children):
-        collector = BooksCollector()
+    def test_get_books_for_children(self, collector, books_data, expected_children):
         for name, genre in books_data:
             collector.add_new_book(name)
-            if genre:
-                collector.set_book_genre(name, genre)
+            collector.set_book_genre(name, genre)
         assert collector.get_books_for_children() == expected_children
 
-    # 8. Тест метода add_book_in_favorites (параметризованный, включая проверку на дубли)
-    @pytest.mark.parametrize("name, add_to_books, call_times, expected_length", [
-        ("Муха-Цокотуха", True, 1, 1),    # книга есть, добавляется 1 раз
-        ("Неизвестная", False, 1, 0),     # книги нет, не добавляется
-        ("Муха-Цокотуха", True, 2, 1)     # дважды одна и та же книга — дубля нет
-    ])
-    def test_add_book_in_favorites(self, name, add_to_books, call_times, expected_length):
-        collector = BooksCollector()
-        if add_to_books:
-            collector.add_new_book(name)
-        for _ in range(call_times):
-            collector.add_book_in_favorites(name)
-        assert len(collector.favorites) == expected_length
-        if expected_length > 0:
-            assert name in collector.favorites
+        # 8a. Добавление существующей книги в избранное (с проверкой дубля)
 
-    # 9. Тест метода delete_book_from_favorites (параметризованный)
-    @pytest.mark.parametrize("name, in_favorites_initially, expected_after_delete", [
-        ("Буратино", True, False),   # удаление существующей в избранном книги
-        ("Буратино", False, False)   # удаление книги, которой нет в избранном
-    ])
-    def test_delete_book_from_favorites(self, name, in_favorites_initially, expected_after_delete):
-        collector = BooksCollector()
-        collector.add_new_book(name)
-        if in_favorites_initially:
-            collector.add_book_in_favorites(name)
-        collector.delete_book_from_favorites(name)
-        assert (name in collector.favorites) == expected_after_delete
+    @pytest.mark.parametrize("call_times, expected_length", [(1, 1), (2, 1)])
+    def test_add_existing_book_to_favorites(self, collector, call_times, expected_length):
+        collector.add_new_book("Муха-Цокотуха")
+        for _ in range(call_times):
+            collector.add_book_in_favorites("Муха-Цокотуха")
+        assert len(collector.favorites) == expected_length
+        assert "Муха-Цокотуха" in collector.favorites
+
+    # 8b. Добавление несуществующей книги в избранное
+    def test_add_nonexistent_book_to_favorites(self, collector):
+        collector.add_book_in_favorites("Неизвестная")
+        assert len(collector.favorites) == 0
+        assert "Неизвестная" not in collector.favorites
+
+        # 9a. Удаление книги, которая есть в избранном
+
+    def test_delete_existing_book_from_favorites(self, collector):
+        collector.add_new_book("Буратино")
+        collector.add_book_in_favorites("Буратино")
+        collector.delete_book_from_favorites("Буратино")
+        assert "Буратино" not in collector.favorites
+
+        # 9b. Удаление книги, которой нет в избранном
+
+    def test_delete_nonexistent_book_from_favorites(self, collector):
+        collector.add_new_book("Буратино")  # книга есть в словаре, но не в избранном
+        collector.delete_book_from_favorites("Буратино")
+        assert "Буратино" not in collector.favorites
 
     # 10. Тест метода get_list_of_favorites_books
     def test_get_list_of_favorites_books(self):
